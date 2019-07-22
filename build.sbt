@@ -1,3 +1,5 @@
+import com.typesafe.sbt.packager.docker.Cmd
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.dockerCommands
 import sbtbuildinfo.BuildInfoKey
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 
@@ -9,7 +11,7 @@ scalaVersion in ThisBuild := "2.12.8"
 resolvers += Resolver.bintrayRepo("lightspeed7", "maven")
 
 //
-// PROJECTS
+// Projects
 // ///////////////////////
 lazy val global = project
   .in(file("."))
@@ -36,7 +38,7 @@ lazy val common = project
   .settings(testOptions in Test := Seq(Tests.Filter(harnessFilter)))
   .settings(
     testGrouping in Test := singleThreadedTests((definedTests in Test).value))
-//
+  //
   .disablePlugins(AssemblyPlugin)
 
 lazy val metadata = project // Play App
@@ -96,7 +98,7 @@ lazy val consumer = project // Backend App
   )
 
 //
-// DEPENDENCIES
+// Dependencies
 // //////////////////////////
 lazy val dependencies =
   new {
@@ -107,45 +109,47 @@ lazy val dependencies =
     val sttpV = "1.5.7"
     val scalatestV = "3.0.4"
 
-    val sk8sCore = "me.lightspeed7" %% "sk8s-core" % sk8sVersion withSources ()
-    val sk8sCoreTest = "me.lightspeed7" %% "sk8s-core" % sk8sVersion % "test" classifier "tests" withSources ()
+    val sk8sCore = /*        */ "me.lightspeed7" %% "sk8s-core" /*        */ % sk8sVersion withSources ()
+    val sk8sPlay = /*        */ "me.lightspeed7" %% "sk8s-play" /*        */ % sk8sVersion withSources ()
+    val sk8sKubernetes = /*  */ "me.lightspeed7" %% "sk8s-kubernetes" /*  */ % sk8sVersion withSources ()
+    val sk8sSlack = /*       */ "me.lightspeed7" %% "sk8s-slack" /*       */ % sk8sVersion withSources ()
+    val sk8sCoreTest = /*    */ "me.lightspeed7" %% "sk8s-core" /*        */ % sk8sVersion % "test" classifier "tests" withSources ()
+    val sk8sPlayTest = /*    */ "me.lightspeed7" %% "sk8s-play" /*        */ % sk8sVersion % "test" classifier "tests" withSources ()
 
-    val sk8sPlay = "me.lightspeed7" %% "sk8s-play" % sk8sVersion withSources ()
-    val sk8sPlayTest = "me.lightspeed7" %% "sk8s-play" % sk8sVersion % "test" classifier "tests" withSources ()
-
-    val sk8sKubernetes = "me.lightspeed7" %% "sk8s-kubernetes" % sk8sVersion withSources ()
-    val sk8sSlack = "me.lightspeed7" %% "sk8s-slack" % sk8sVersion withSources ()
-
-    val scalatest = "org.scalatest" %% "scalatest" % scalatestV % "test" withSources ()
+    val scalaTest = "org.scalatest" %% "scalatest" % scalatestV % "test" withSources ()
     val scalaTestPlus = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test" withSources ()
 
     def playLibs: Seq[ModuleID] =
       Seq( //
         scalaTestPlus,
-        "com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava"),
-        "com.typesafe.play" %% "play-guice" % playV withSources () exclude ("com.google.guava", "guava"), //
-        "com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava"),
-        "com.typesafe.play" %% "play" /*     */ % playV withSources () exclude ("com.google.guava", "guava") exclude ("com.typesafe.akka", "akka-actor") exclude ("org.scala-lang", "scala-library"),
-        "com.typesafe.play" %% "play-logback" % playV withSources () exclude ("com.google.guava", "guava")
+        "com.typesafe.play" %% "play-functional" /*  */ % playJsonV /*  */ withSources () exclude ("com.google.guava", "guava"),
+        "com.typesafe.play" %% "play-guice" /*       */ % playV /*      */ withSources () exclude ("com.google.guava", "guava"), //
+        "com.typesafe.play" %% "filters-helpers" /*  */ % playV /*      */ withSources () exclude ("com.google.guava", "guava"),
+        "com.typesafe.play" %% "play" /*             */ % playV /*      */ withSources () exclude ("com.google.guava", "guava") exclude ("com.typesafe.akka", "akka-actor") exclude ("org.scala-lang", "scala-library"),
+        "com.typesafe.play" %% "play-logback" /*     */ % playV /*      */ withSources () exclude ("com.google.guava", "guava")
       )
   }
 
-lazy val commonDependencies = dependencies.playLibs ++ Seq(
+lazy val commonDependencies = Seq(
   dependencies.sk8sCore,
   dependencies.sk8sCoreTest,
-  dependencies.scalatest
+  dependencies.scalaTest
 )
 
-lazy val playAppDeps = Seq(
+lazy val playAppDeps = dependencies.playLibs ++ Seq(
   dependencies.sk8sPlay,
   dependencies.sk8sCoreTest,
   dependencies.sk8sPlayTest,
+  dependencies.scalaTest,
   dependencies.scalaTestPlus
 )
 
+//
+// Settings and Helpers
+// //////////////////////////
 lazy val settings =
   commonSettings ++
-//wartremoverSettings ++
+    //wartremoverSettings ++
     scalafmtSettings
 
 lazy val compilerOptions = Seq(
@@ -187,7 +191,7 @@ lazy val deploymentSettings = Seq(
   publishArtifact in packageDoc := false,
   publishMavenStyle := true
   //
-//  publishTo := publishDest // must use aliases to publish
+  //  publishTo := publishDest // must use aliases to publish
 )
 
 //def publishDest: Option[Resolver] = Some("Some Realm" at "tbd")
@@ -211,6 +215,10 @@ def buildInfoVars(name: SettingKey[String],
 
   def commit: String = ("git rev-parse --short HEAD" !!).trim
 
+  def branch: String = ("git rev-parse --abbrev-ref HEAD" !!).trim
+
+  def hasUnCommitted: Boolean = ("git diff-index --quiet HEAD --" !) != 0
+
   def generateBuildInfo(name: BuildInfoKey,
                         version: BuildInfoKey,
                         scalaVersion: BuildInfoKey,
@@ -226,15 +234,32 @@ def buildInfoVars(name: SettingKey[String],
       hasUnCommitted
     }
 
-  def branch: String = ("git rev-parse --abbrev-ref HEAD" !!).trim
-
-  def hasUnCommitted: Boolean = ("git diff-index --quiet HEAD --" !) != 0
-
   Seq(
     buildInfoPackage := "me.lightspeed7.sk8s.example",
     buildInfoKeys := generateBuildInfo(BuildInfoKey.action("name")(name.value),
                                        version,
                                        scalaVersion,
                                        sbtVersion)
+  )
+}
+
+def dockerVars(
+    name: SettingKey[String],
+    baseImage: String = "openjdk:11-jre-slim",
+    backend: Boolean = false
+) = {
+
+  val ports = if (backend) {
+    Seq(8999)
+  } else {
+    Seq(8999, 9000)
+  }
+
+  Seq(
+    packageName in Docker := name.value,
+    maintainer := "Dave Buschman",
+    dockerBaseImage := baseImage,
+    dockerExposedPorts := ports,
+    dockerCommands += Cmd("ENV", "BACKEND_SERVER true")
   )
 }
