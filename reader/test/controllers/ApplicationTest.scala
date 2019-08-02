@@ -1,11 +1,6 @@
 package controllers
 
-import me.lightspeed7.sk8s.{
-  BackgroundTasks,
-  EnvironmentSource,
-  PlayServerFunSuite,
-  Sources
-}
+import me.lightspeed7.sk8s.{ BackgroundTasks, EnvironmentSource, PlayServerFunSuite, Sources }
 
 class ApplicationTest extends PlayServerFunSuite {
 

@@ -8,20 +8,19 @@ import org.joda.time.DateTime
 
 object Application extends App with StrictLogging {
 
-  for (app <- AutoClose(
-         new BackendApplication(AppInfo(BuildInfo.name,
-                                        BuildInfo.version,
-                                        new DateTime(BuildInfo.buildTime))))) {
+  implicit val appInfo = AppInfo(BuildInfo.name, BuildInfo.version, new DateTime(BuildInfo.buildTime))
+
+  for (app <- AutoClose(new BackendApplication(appInfo))) {
 
     import app._
 
-    logger.info(s"Beginning app '${appInfo.appName}'")
+    logger.info(s"Beginning app '${app.appInfo.appName}'")
     try {
       // Stand up the application internals
       //
       val _ =
         Variables.source(Sources.env, "MY_POD_IP", Constant("unknown")).value
-      val counter = TelemetryRegistry.counter("david")
+      val counter = TelemetryRegistry.counter("david")(app.appInfo)
 
       // Standup Completed
       logger.info(banner)
@@ -35,17 +34,16 @@ object Application extends App with StrictLogging {
     } catch {
       case ex: Throwable => shutdown(ex)
     } finally {
-      logger.debug(
-        "***********************************************************")
+      logger.debug("***********************************************************")
       logger.debug("** Shutdown")
-      logger.debug(
-        "***********************************************************")
+      logger.debug("***********************************************************")
     }
 
   }
 
   def banner: String = // http://patorjk.com/software/taag/#p=display&f=Big%20Money-sw&t=Type%20App%20Name
-    """  ______
+    """
+      |  ______
       | /      \
       |/$$$$$$  |  ______   _______    _______  __    __  _____  ____    ______    ______
       |$$ |  $$/  /      \ /       \  /       |/  |  /  |/     \/    \  /      \  /      \

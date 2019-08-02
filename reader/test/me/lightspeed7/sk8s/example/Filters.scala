@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.example
 
 import javax.inject.Inject
-import me.lightspeed7.sk8s.{ResponseFilter, TelemetryFilter}
+import me.lightspeed7.sk8s.{ ResponseFilter, TelemetryFilter }
 import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter
 import play.filters.gzip.GzipFilter

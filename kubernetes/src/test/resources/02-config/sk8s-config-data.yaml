@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sk8s-config
+  namespace: data
+data:
+  cluster-name: cluster
+  sk8s-run-mode: Developer
+
+    

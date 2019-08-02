@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.example
 
 import java.io.File
-import java.nio.file.{Path, Paths}
+import java.nio.file.{ Path, Paths }
 
 import javax.inject.Inject
 import me.lightspeed7.sk8s._
@@ -14,9 +14,7 @@ import scala.concurrent.Future
 
 class GlobalModule extends Sk8sBindings {
 
-  implicit val appInfo: AppInfo = AppInfo(BuildInfo.name,
-                                          BuildInfo.version,
-                                          new DateTime(BuildInfo.buildTime))
+  implicit val appInfo: AppInfo = AppInfo(BuildInfo.name, BuildInfo.version, new DateTime(BuildInfo.buildTime))
 
   override def configure(): Unit = {
     generate(appInfo)
@@ -31,14 +29,11 @@ class Initialize @Inject()( //
                            implicit val appCtx: Sk8sContext)
     extends LazyJsonLogging {
 
-  def isKubernetes(
-      basePath: Path = Paths.get(
-        "/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean =
+  def isKubernetes(basePath: Path = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean =
     new File(basePath.toString).exists()
 
   if (isKubernetes()) {
     logger.info(s"Kubernetes - ${Sk8s.serviceAccount().isKubernetes}")
-
   } else {
     logger.warn("Kubernetes NOT detected !!! ")
   }
@@ -55,8 +50,8 @@ class Initialize @Inject()( //
   // finish
   //
   // Go to : http://patorjk.com/software/taag/#p=display&f=Big%20Money-sw&t=Type%20App%20Name
-  Logger.info(
-    """ __       __              __                      __              __
+  Logger.info("""
+      | __       __              __                      __              __
       |/  \     /  |            /  |                    /  |            /  |
       |$$  \   /$$ |  ______   _$$ |_     ______    ____$$ |  ______   _$$ |_     ______
       |$$$  \ /$$$ | /      \ / $$   |   /      \  /    $$ | /      \ / $$   |   /      \

@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.example
 
 import akka.stream.Materializer
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import me.lightspeed7.sk8s._
 import play.api.Logger
 import play.api.mvc._
@@ -9,13 +9,9 @@ import play.api.mvc._
 import scala.concurrent._
 
 @Singleton
-class ErrorHandler @Inject()(implicit val mat: Materializer,
-                             ec: ExecutionContext)
-    extends play.api.http.HttpErrorHandler {
+class ErrorHandler @Inject()(implicit val mat: Materializer, ec: ExecutionContext) extends play.api.http.HttpErrorHandler {
 
-  def onClientError(request: RequestHeader,
-                    statusCode: Int,
-                    message: String): Future[Result] = {
+  def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     import play.api.http.Status._
     val sc = statusCode
     Future.successful {
@@ -27,14 +23,12 @@ class ErrorHandler @Inject()(implicit val mat: Materializer,
         case clientError if sc >= 400 && sc < 500 =>
           JsonResult.globalOnBadRequest(message)
         case nonClientError =>
-          throw new IllegalArgumentException(
-            s"onClientError invoked with non client error status code $statusCode: $message")
+          throw new IllegalArgumentException(s"onClientError invoked with non client error status code $statusCode: $message")
       }
     }
   }
 
-  def onServerError(request: RequestHeader,
-                    exception: Throwable): Future[Result] =
+  def onServerError(request: RequestHeader, exception: Throwable): Future[Result] =
     Future.successful(JsonResult.globalOnError(exception))
 
 }
