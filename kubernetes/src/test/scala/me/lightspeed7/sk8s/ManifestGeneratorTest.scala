@@ -20,15 +20,13 @@ class ManifestGeneratorTest extends Sk8sFunSuite {
 
   def writeDeployment(name: String, config: Sk8sAppConfig): Unit = {
     println("****************")
-    config.defaultVars.foreach(println)
+    Sk8sAppConfig.defaultVars(config).foreach(println)
     println("****************")
     config.envVars.foreach(println)
     println("****************")
 
     config.createDeploymentBase.map { dep: Deployment =>
-      val depWIthEnv = dep.withEnvVars(config.envVars ++ config.defaultVars)
-
-      val json: JsValue = Json.toJson(depWIthEnv)
+      val json: JsValue = Json.toJson(dep)
       val pretty        = Json.prettyPrint(json)
       writeLibraryTestFile("kubernetes", "03-deployments", s"$name-deploy.json").write(pretty)
     }

@@ -63,36 +63,6 @@
           }, {
             "name" : "BACKEND_SERVER",
             "value" : "true"
-          }, {
-            "name" : "LOG_LEVEL",
-            "value" : "INFO"
-          }, {
-            "name" : "SK8S_RUN_MODE",
-            "valueFrom" : {
-              "configMapKeyRef" : {
-                "key" : "sk8s-run-mode",
-                "name" : "sk8s-config"
-              }
-            }
-          }, {
-            "name" : "HOST_IP",
-            "valueFrom" : {
-              "fieldRef" : {
-                "fieldPath" : "status.hostIP",
-                "apiVersion" : "v1"
-              }
-            }
-          }, {
-            "name" : "POD_IP",
-            "valueFrom" : {
-              "fieldRef" : {
-                "fieldPath" : "status.podIP",
-                "apiVersion" : "v1"
-              }
-            }
-          }, {
-            "name" : "JAVA_OPTS",
-            "value" : "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 "
           } ],
           "resources" : {
             "limits" : {
