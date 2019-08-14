@@ -6,7 +6,7 @@ import java.nio.file.{ Path, Paths }
 import javax.inject.Inject
 import me.lightspeed7.sk8s._
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
-import org.joda.time.DateTime
+
 import play.api._
 import play.api.inject.ApplicationLifecycle
 
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 
 class GlobalModule extends Sk8sBindings {
 
-  implicit val appInfo: AppInfo = AppInfo(BuildInfo.name, BuildInfo.version, new DateTime(BuildInfo.buildTime))
+  implicit val appInfo: AppInfo = sk8s.build.appInfo
 
   override def configure(): Unit = {
     generate(appInfo)

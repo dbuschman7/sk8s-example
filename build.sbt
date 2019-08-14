@@ -10,6 +10,7 @@ version in ThisBuild := "0.0.1"
 scalaVersion in ThisBuild := "2.12.8"
 resolvers += Resolver.bintrayRepo("lightspeed7", "maven")
 
+val sk8sV = "0.6.2"
 //
 // Projects
 // ///////////////////////
@@ -43,10 +44,12 @@ lazy val common = project
   .disablePlugins(AssemblyPlugin)
 
 lazy val metadata = project // Play App
-  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin)
+  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin, Sk8sPlugin)
   .settings(
     name := "metadata",
     settings,
+    sk8sPlayApp := true,
+    sk8sVersion := sk8sV,
     publishArtifact := false,
     skip in publish := true,
     libraryDependencies ++= commonDependencies ++ playAppDeps,
@@ -58,10 +61,12 @@ lazy val metadata = project // Play App
   )
 
 lazy val reader = project // Play App
-  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin)
+  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin, Sk8sPlugin)
   .settings(
     name := "reader",
     settings,
+    sk8sPlayApp := true,
+    sk8sVersion := sk8sV,
     publishArtifact := false,
     skip in publish := true,
     libraryDependencies ++= commonDependencies ++ playAppDeps,
@@ -73,10 +78,12 @@ lazy val reader = project // Play App
   )
 
 lazy val producer = project // Play App
-  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin)
+  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin, Sk8sPlugin)
   .settings(
     name := "producer",
     settings,
+    sk8sPlayApp := true,
+    sk8sVersion := sk8sV,
     publishArtifact := false,
     skip in publish := true,
     libraryDependencies ++= commonDependencies ++ playAppDeps,
@@ -88,10 +95,11 @@ lazy val producer = project // Play App
   )
 
 lazy val consumer = project // Backend App
-  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, DockerPlugin)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, DockerPlugin, Sk8sPlugin)
   .settings(
     name := "consumer",
     settings,
+    sk8sVersion := sk8sV,
     publishArtifact := false,
     skip in publish := true,
     libraryDependencies ++= commonDependencies,

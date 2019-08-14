@@ -1,5 +1,8 @@
 logLevel := Level.Warn
 
+resolvers += Resolver.bintrayIvyRepo("lightspeed7", "sbt-plugins")
+addSbtPlugin("me.lightspeed7" % "sbt-sk8s" % "0.6.2")
+
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.2")
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.7")
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0")
